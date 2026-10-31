@@ -1,0 +1,33 @@
+{
+  "publish_at": "2026-11-07T10:00:00+01:00",
+  "pillar": "Reader talk",
+  "caption": "Christmas romance, this or that edition. 🚆\n\nSwipe, pick, and tell me your answers in the comments. I’ll go first: train, one room, grumpy. Obviously.\n\n#thisorthat #christmasromance #romancebooks #bookstagram #booktok #romancereads #cosyreads #bookishquestions",
+  "slides": [
+    {
+      "type": "cover",
+      "kicker": "This or that",
+      "title": "Christmas romance edition",
+      "subtitle": "Pick one. No cheating."
+    },
+    {
+      "type": "text",
+      "heading": "Train or plane?",
+      "body": "Snowed-in sleeper carriage, or a private jet that never takes off?"
+    },
+    {
+      "type": "text",
+      "heading": "Chalet or guesthouse?",
+      "body": "Mountain views and a roaring fire, or a tiny inn with one room left?"
+    },
+    {
+      "type": "text",
+      "heading": "Grumpy or sunshine?",
+      "body": "The one who says “fine”, or the one who makes everyone laugh?"
+    },
+    {
+      "type": "cta",
+      "title": "Tell me your three.",
+      "body": "Comment below. Mine are in the caption."
+    }
+  ]
+}
