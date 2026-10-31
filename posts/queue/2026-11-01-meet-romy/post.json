@@ -1,0 +1,36 @@
+{
+  "publish_at": "2026-11-01T10:00:00+01:00",
+  "pillar": "Reader talk",
+  "caption": "Hi, I’m Romy. 💌\n\nI write warm, witty romance about women who build lives of their own, and the people who learn to stand next to them.\n\nMy series is called Out of Office. Book one, Rerouted for Christmas, is almost here: a snowstorm, a cancelled flight, and a boss who has never taken a train on his own.\n\nWhat’s your favourite romance trope? Tell me below and I’ll tell you mine.\n\n#romancebooks #bookstagram #booktok #christmasromance #romancereads #newauthor #indieauthor #kindleunlimited",
+  "slides": [
+    {
+      "type": "cover",
+      "kicker": "Hello",
+      "title": "Hi, I’m Romy Calloway.",
+      "subtitle": "I write warm, witty romance about women who build lives of their own."
+    },
+    {
+      "type": "text",
+      "number": "01",
+      "heading": "What I write",
+      "body": "Love stories with jobs in them. Heroines who are good at what they do, men who have to learn to say thank you, and always a happy ending."
+    },
+    {
+      "type": "text",
+      "number": "02",
+      "heading": "The Out of Office series",
+      "body": "Every book follows a woman starting something of her own. Each one is complete in itself, and the friends keep turning up."
+    },
+    {
+      "type": "book",
+      "image": "assets/covers/rerouted-for-christmas.jpg",
+      "kicker": "Book one · coming this week",
+      "title": "Rerouted for Christmas"
+    },
+    {
+      "type": "cta",
+      "title": "Come along for the ride.",
+      "body": "Follow for book news, first chapters and cosy reads."
+    }
+  ]
+}
