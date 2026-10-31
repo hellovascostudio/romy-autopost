@@ -1,0 +1,58 @@
+name: Render reels
+
+# Maakt reel.mp4 + thumb.jpg voor elke reel-post (post.json met "type": "reel") die nog geen video heeft,
+# en commit die terug naar dezelfde branch. Draait vanzelf bij een push naar een week-branch.
+# Opnieuw maken (bijv. na een tekstwijziging): Actions > Render reels > Run workflow, met force aan.
+on:
+  push:
+    branches: ["week-*"]
+    paths: ["posts/queue/**/post.json", "scripts/reel.py", "video/src/**"]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Alle reels opnieuw maken"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reels-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow==11.3.0 edge-tts==7.3.1
+      - name: ffmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          ffmpeg-version: release
+      - run: ffmpeg -version | head -1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Remotion
+        working-directory: video
+        run: npm ci && npx remotion browser ensure
+      - name: Render
+        env:
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+        run: |
+          set -o pipefail
+          python scripts/reel.py --all ${{ inputs.force && '--force' || '' }} 2>&1 | tee render.log || {
+            echo "::error title=Render failed::$(tail -c 3500 render.log | tr '\n' ' ')"; exit 1; }
+          rm -f render.log
+      - name: Commit videos
+        run: |
+          git config user.name "romy-autopost"
+          git config user.email "actions@users.noreply.github.com"
+          git add posts/queue
+          git diff --cached --quiet || (git commit -m "Render reels [skip ci]" && git push)

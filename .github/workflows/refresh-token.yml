@@ -1,0 +1,32 @@
+name: Refresh Instagram token
+
+# Instagram-tokens verlopen na 60 dagen. Dit verlengt hem elke 1e en 15e van de maand.
+# Als het token verandert en de secret GH_PAT bestaat, wordt IG_ACCESS_TOKEN automatisch bijgewerkt.
+on:
+  schedule:
+    - cron: "41 6 1,15 * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh
+        env:
+          TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          resp=$(curl -sS --fail-with-body "https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${TOKEN}") || { echo "Vernieuwen mislukt"; echo "$resp" | sed "s/${TOKEN}/***/g"; exit 1; }
+          new=$(echo "$resp" | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+          echo "::add-mask::$new"
+          days=$(echo "$resp" | python3 -c "import sys,json; print(json.load(sys.stdin).get('expires_in',0)//86400)")
+          echo "Token geldig voor nog ${days} dagen."
+          if [ "$new" != "$TOKEN" ]; then
+            if [ -n "$GH_TOKEN" ]; then
+              gh secret set IG_ACCESS_TOKEN --repo "${{ github.repository }}" --body "$new"
+              echo "Nieuw token opgeslagen."
+            else
+              echo "::error::Token is veranderd maar GH_PAT ontbreekt; zet het nieuwe token handmatig."
+              exit 1
+            fi
+          fi

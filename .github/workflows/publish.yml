@@ -1,0 +1,59 @@
+name: Publish to Instagram
+
+# GitHub voert geplande runs onregelmatig uit (soms urenlang niet). Daarom blijft een geplande run
+# zelf ~5,5 uur actief en controleert hij elke 10 minuten. Zodra hij stopt, neemt de volgende
+# geplande run (die in de wachtrij staat) het meteen over. Handmatig starten doet één ronde.
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "check = alleen token testen, dry-run = niets plaatsen, publish = echt plaatsen"
+        type: choice
+        options: [check, dry-run, publish]
+        default: check
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow==11.3.0
+      - name: Publish (loops every 10 minutes on scheduled runs)
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          RAW_BASE: https://raw.githubusercontent.com/${{ github.repository }}/main
+          DRY_RUN: ${{ inputs.mode == 'dry-run' && '1' || '0' }}
+          MODE: ${{ inputs.mode }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          git config user.name "romy-autopost"
+          git config user.email "actions@users.noreply.github.com"
+          rounds=1
+          if [ "$EVENT" = "schedule" ]; then rounds=33; fi
+          failed=0
+          for i in $(seq 1 $rounds); do
+            git pull -q --rebase origin main || echo "::warning::git pull failed in round $i"
+            python scripts/render.py --all || true
+            if [ "$MODE" = "check" ]; then
+              python scripts/publish.py --check || failed=1
+            else
+              python scripts/publish.py || { failed=1; echo "::warning::publish had errors in round $i"; }
+            fi
+            git add -A posts
+            git diff --cached --quiet || { git commit -qm "Published posts [skip ci]" && git push -q origin HEAD:main; } || echo "::warning::could not save state in round $i"
+            if [ "$i" -lt "$rounds" ]; then sleep 600; fi
+          done
+          exit $failed
